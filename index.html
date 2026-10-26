@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Salmon Run">
+<meta name="theme-color" content="#090b24">
 <title>Shaky Pete’s: Salmon Run</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,25 +32,46 @@ canvas{display:block;width:100%;max-width:min(100%,calc((100dvh - 70px)*16/9));h
 canvas:focus-visible{box-shadow:0 0 0 3px #ff9e2c}
 .help{margin:0;color:var(--muted);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;text-align:center;line-height:1.7;max-width:70ch}
 .help b{color:var(--ink);font-weight:600}
-.pad{display:none}
+.pad,.hint{display:none}
+/* touch layout: portrait = game on top, controls below; landscape = full-screen game, controls over it */
+html:has(body.touch){overscroll-behavior:none;height:100%}
+body.touch{overscroll-behavior:none;overflow:hidden;height:100dvh;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.touch .wrap{padding:0;gap:0;max-width:none;height:100%;margin:0}
 .touch .help{display:none}
-.touch canvas{max-width:min(100%,calc((100dvh - 210px)*16/9))}
-.touch .pad{display:flex;width:100%;max-width:520px;justify-content:space-between;align-items:center;margin-top:14px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.dpad{width:132px;height:132px;border-radius:50%;background:var(--pad);border:2px solid var(--edge);position:relative;touch-action:none}
-.dpad span{position:absolute;width:0;height:0;border:9px solid transparent;opacity:.7}
-.dpad .u{left:57px;top:10px;border-bottom:12px solid var(--padink);border-top:0}
-.dpad .d{left:57px;bottom:10px;border-top:12px solid var(--padink);border-bottom:0}
-.dpad .l{top:57px;left:10px;border-right:12px solid var(--padink);border-left:0}
-.dpad .r{top:57px;right:10px;border-left:12px solid var(--padink);border-right:0}
-.btns{display:flex;gap:12px;align-items:center}
-.btns button{font:inherit;font-size:12px;color:var(--padink);background:var(--pad);border:2px solid var(--edge);border-radius:50%;width:76px;height:76px;touch-action:none;padding:0;line-height:1.2}
-.btns button.act{width:88px;height:88px;background:#ff9e2c;color:#1a0f02;border-color:#c46f12}
-.btns button.pause{width:40px;height:40px;border-radius:10px;font-size:11px}
-.btns button.on{filter:brightness(1.25)}
+.touch .stage{height:100%;justify-content:flex-start}
+.touch canvas{width:100vw;max-width:none;border-radius:0}
+.touch .hint{display:block;margin:0;padding:8px 12px 0;font:13px/1.4 system-ui,-apple-system,sans-serif;color:var(--muted);text-align:center}
+.touch .pad{display:block;position:relative;flex:1;width:100%;min-height:210px;touch-action:none}
+.stickzone{position:absolute;left:0;top:0;bottom:0;width:50%;touch-action:none}
+.stick{position:absolute;left:30%;top:58%;width:116px;height:116px;margin:-58px 0 0 -58px;border-radius:50%;background:var(--pad);border:2px solid var(--edge);opacity:.6;pointer-events:none}
+.stick.on{opacity:.9}
+.knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:var(--padink);opacity:.55}
+.btns{position:absolute;right:0;top:0;bottom:0;width:50%;pointer-events:none}
+.btns button{position:absolute;pointer-events:auto;font:600 13px/1.15 system-ui,-apple-system,sans-serif;color:var(--padink);background:var(--pad);border:2px solid var(--edge);border-radius:50%;touch-action:none;padding:0;-webkit-tap-highlight-color:transparent}
+.btns .act{width:96px;height:96px;right:calc(18px + env(safe-area-inset-right,0px));bottom:24%;background:#ff9e2c;color:#1a0f02;border-color:#c46f12}
+.btns .dodge{width:72px;height:72px;right:calc(124px + env(safe-area-inset-right,0px));bottom:calc(24% - 8px)}
+.btns .phone{width:76px;height:76px;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(24% + 110px);background:#4fe3ff;color:#06222a;border-color:#2aa8c0;animation:ring .5s infinite alternate}
+@keyframes ring{to{transform:rotate(8deg) scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.btns .phone{animation:none}}
+.btns .sys{width:48px;height:36px;border-radius:10px;top:10px;font-size:12px}
+.btns .pause{right:calc(12px + env(safe-area-inset-right,0px))}
+.btns .fs{right:calc(68px + env(safe-area-inset-right,0px))}
+.btns button.on{filter:brightness(1.2);transform:scale(.94)}
 @media (orientation:landscape){
-  .touch canvas{max-width:min(100%,calc((100dvh - 24px)*16/9))}
-  .touch .pad{position:absolute;left:0;right:0;bottom:8px;max-width:none;margin:0;padding:0 12px;box-sizing:border-box;pointer-events:none}
-  .touch .pad > *{pointer-events:auto;opacity:.6}
+  .touch .hint{display:none}
+  .touch .stage{justify-content:center;background:#000}
+  .touch canvas{width:min(100vw,calc(100dvh*16/9));height:auto}
+  .touch .pad{position:absolute;inset:0;min-height:0;pointer-events:none}
+  .touch .pad .stickzone{pointer-events:auto}
+  .touch .pad:not(.live) .stickzone{pointer-events:none}
+  .touch .pad:not(.live) .stick,.touch .pad:not(.live) .dodge{opacity:0;pointer-events:none}
+  .touch .stick{left:calc(16% + env(safe-area-inset-left,0px));top:68%;opacity:.35}
+  .touch .stick.on{opacity:.6}
+  .touch .btns button{opacity:.6}
+  .touch .btns .act{bottom:12%}
+  .touch .btns .dodge{bottom:calc(12% - 8px)}
+  .touch .btns .phone{bottom:calc(12% + 110px)}
+  .touch .btns .sys{top:calc(11% + 6px)}
 }
 </style>
 </head>
@@ -53,12 +79,14 @@ canvas:focus-visible{box-shadow:0 0 0 3px #ff9e2c}
 <main class="wrap">
   <div class="stage">
     <canvas id="game" width="480" height="270" tabindex="0" aria-label="Shaky Pete’s: Salmon Run, a side-scrolling street game"></canvas>
+    <p class="hint">Turn your phone sideways for a bigger screen.</p>
     <div class="pad" id="pad">
-      <div class="dpad" id="dpad"><span class="u"></span><span class="d"></span><span class="l"></span><span class="r"></span></div>
+      <div class="stickzone" id="stickzone"><div class="stick" id="stick"><div class="knob" id="knob"></div></div></div>
       <div class="btns">
-        <button class="pause" data-k="tPause" aria-label="Pause">II</button>
-        <button data-k="tAnswer">Phone</button>
-        <button data-k="tDodge">Dodge</button>
+        <button class="sys pause" data-k="tPause" aria-label="Pause">II</button>
+        <button class="sys fs" id="fsBtn" aria-label="Full screen">Full</button>
+        <button class="phone" data-k="tAnswer" id="phoneBtn" hidden>Answer</button>
+        <button class="dodge" data-k="tDodge">Dodge</button>
         <button class="act" data-k="tAct">Brush off</button>
       </div>
     </div>
@@ -171,23 +199,52 @@ addEventListener('blur',()=>{for(const k in held)held[k]=false;});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&(state==='play'||state==='casino')){prevState=state;state='paused';}});
 
 if(matchMedia('(pointer:coarse)').matches||'ontouchstart' in window)document.body.classList.add('touch');
-document.querySelectorAll('.btns button').forEach(b=>{
+const TOUCH=document.body.classList.contains('touch');
+function buzz(p){if(TOUCH&&navigator.vibrate){try{navigator.vibrate(p);}catch(e){}}}
+document.querySelectorAll('.btns button[data-k]').forEach(b=>{
   const k=b.dataset.k;
   const down=e=>{e.preventDefault();unlockAudio();held[k]=true;pressedQ.add(k);b.classList.add('on');try{b.setPointerCapture(e.pointerId)}catch(_){}};
   const up=()=>{held[k]=false;b.classList.remove('on')};
   b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
   b.addEventListener('contextmenu',e=>e.preventDefault());
 });
-const dpad=document.getElementById('dpad');
-function dpadSet(e){
-  const r=dpad.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),t=r.width*0.14;
-  const set=(k,v)=>{if(v&&!held[k])pressedQ.add(k);held[k]=v;};
-  set('tLeft',dx<-t);set('tRight',dx>t);set('tUp',dy<-t);set('tDown',dy>t);
-}
+const padEl=document.getElementById('pad'),zone=document.getElementById('stickzone'),stickEl=document.getElementById('stick'),knob=document.getElementById('knob'),phoneBtn=document.getElementById('phoneBtn'),fsBtn=document.getElementById('fsBtn');
+let stickId=null,sx0=0,sy0=0;
 function dpadClear(){held.tLeft=held.tRight=held.tUp=held.tDown=false;}
-dpad.addEventListener('pointerdown',e=>{e.preventDefault();unlockAudio();try{dpad.setPointerCapture(e.pointerId)}catch(_){}dpadSet(e);});
-dpad.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')dpadSet(e);});
-dpad.addEventListener('pointerup',dpadClear);dpad.addEventListener('pointercancel',dpadClear);
+function stickReset(){stickEl.classList.remove('on');stickEl.style.left='';stickEl.style.top='';knob.style.transform='';}
+function stickMove(e){
+  let dx=e.clientX-sx0,dy=e.clientY-sy0;const R=46,d=Math.hypot(dx,dy);if(d>R){dx*=R/d;dy*=R/d;}
+  knob.style.transform='translate('+dx+'px,'+dy+'px)';
+  const nx=dx/R,ny=dy/R,set=(k,v)=>{if(v&&!held[k])pressedQ.add(k);held[k]=v;};
+  set('tLeft',nx<-0.38);set('tRight',nx>0.38);set('tUp',ny<-0.38);set('tDown',ny>0.38);
+}
+zone.addEventListener('pointerdown',e=>{
+  e.preventDefault();unlockAudio();
+  const live=state==='play'||state==='casino';
+  if(!live&&state!=='select'){pressedQ.add(state==='paused'?'tPause':'tap');return;}
+  if(stickId!==null)return;
+  stickId=e.pointerId;try{zone.setPointerCapture(e.pointerId)}catch(_){}
+  const r=zone.getBoundingClientRect();sx0=e.clientX;sy0=e.clientY;
+  stickEl.style.left=(e.clientX-r.left)+'px';stickEl.style.top=(e.clientY-r.top)+'px';stickEl.classList.add('on');stickMove(e);
+});
+zone.addEventListener('pointermove',e=>{if(e.pointerId===stickId)stickMove(e);});
+const stickEnd=e=>{if(e.pointerId!==stickId)return;stickId=null;stickReset();dpadClear();};
+zone.addEventListener('pointerup',stickEnd);zone.addEventListener('pointercancel',stickEnd);
+if(!document.documentElement.requestFullscreen)fsBtn.hidden=true;
+fsBtn.addEventListener('click',async()=>{
+  try{
+    if(!document.fullscreenElement){await document.documentElement.requestFullscreen({navigationUI:'hide'});if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape').catch(()=>{});}
+    else await document.exitFullscreen();
+  }catch(e){}
+});
+let padLiveLast=null,phoneLast=null;
+function syncPad(){
+  if(!TOUCH)return;
+  const live=state==='play'||state==='casino';
+  if(live!==padLiveLast){padLiveLast=live;padEl.classList.toggle('live',live);if(!live&&state!=='select'){stickId=null;stickReset();dpadClear();}}
+  const ph=state==='play'&&phone.stage===1;
+  if(ph!==phoneLast){phoneLast=ph;phoneBtn.hidden=!ph;}
+}
 cv.addEventListener('pointerdown',e=>{
   unlockAudio();cv.focus();
   const r=cv.getBoundingClientRect(),lx=(e.clientX-r.left)/r.width*W;
@@ -257,13 +314,13 @@ function moveToward(e,tx,ty,dt){
 function grab(e){
   e.state='grab';e.door=nearestDoor(P.x);
   P.state='grabbed';P.grabbedBy=e;P.escape=0;
-  snd(90,0.18,'triangle',0.07);say(e,rnd(GRAB_LINES));say(P,'Oi! Get off!');
+  snd(90,0.18,'triangle',0.07);buzz(40);say(e,rnd(GRAB_LINES));say(P,'Oi! Get off!');
 }
 function breakFree(){
   const e=P.grabbedBy;
   if(e){e.state='stun';e.t=1.1;e.vx=(Math.sign(e.x-P.x)||1)*170;e.hp-=8;e.flash=0.15;if(e.hp<=0){e.state='flee';say(e,rnd(FLEE_LINES));drop(e);}}
   P.state='idle';P.grabbedBy=null;P.escape=0;P.invuln=0.9;
-  float(P.x,P.y-44,'Not tonight!','#ffd23f');snd(700,0.12,'square',0.05,-300);shake=3;
+  float(P.x,P.y-44,'Not tonight!','#ffd23f');buzz(25);snd(700,0.12,'square',0.05,-300);shake=3;
 }
 function drop(e){
   if(e.type==='bouncer'){pickups.push({x:e.x-8,y:e.y,type:'salmon',t:0},{x:e.x+8,y:clamp(e.y+6,FY0,FY1),type:'salmon',t:1});return;}
@@ -321,7 +378,7 @@ function draggedIn(e,d){
   loseLife(msg);
 }
 function loseLife(msg){
-  P.lives--;snd(200,0.4,'sawtooth',0.05,-150);shake=5;
+  P.lives--;snd(200,0.4,'sawtooth',0.05,-150);buzz([80,40,120]);shake=5;
   if(P.grabbedBy){const e=P.grabbedBy;if(!e.dead){e.state='flee';e.vx=(Math.sign(e.x-P.x)||1)*140;}}
   P.grabbedBy=null;P.escape=0;
   if(P.lives<=0){state='over';endT=0;overMsg=msg;return;}
@@ -345,7 +402,7 @@ function doAttack(){
       if(e.hp<=0){e.state='flee';e.vx=P.face*160;say(e,rnd(FLEE_LINES));drop(e);}
     }
   }
-  if(hit){snd(140,0.08,'sawtooth',0.05,-60);shake=big?4:2;if(big)float(P.x+P.face*20,P.y-40,'Shove!','#ffd23f');}
+  if(hit){snd(140,0.08,'sawtooth',0.05,-60);buzz(12);shake=big?4:2;if(big)float(P.x+P.face*20,P.y-40,'Shove!','#ffd23f');}
 }
 function updatePlayer(dt,minX,maxX,minY,maxY){
   P.invuln=Math.max(0,P.invuln-dt);P.atkCd-=dt;P.dodgeCd-=dt;P.slow=Math.max(0,P.slow-dt);P.comboT-=dt;P.drinkT-=dt;P.sayT-=dt;
@@ -432,7 +489,7 @@ function updatePlay(dt){
   for(const p of proj){
     p.x+=p.vx*dt;p.t+=dt;
     if(P.invuln<=0&&P.state!=='dodge'&&Math.abs(p.x-P.x)<8&&Math.abs(p.y-P.y)<9){
-      p.hit=true;P.hp-=8;P.slow=1.5;float(P.x,P.y-44,'Flyered!','#ff4fa3');snd(180,0.08,'square',0.04);shake=2;
+      p.hit=true;P.hp-=8;P.slow=1.5;float(P.x,P.y-44,'Flyered!','#ff4fa3');buzz(20);snd(180,0.08,'square',0.04);shake=2;
     }
   }
   proj=proj.filter(p=>!p.hit&&p.t<3);
@@ -457,7 +514,7 @@ function updPhone(dt){
   if(phone.stage===0&&P.x>=PHONE_X){phone.stage=1;phone.ring=0;banner('Incoming call: Senior Ali',3);}
   if(phone.stage===1){
     phone.ring-=dt;
-    if(phone.ring<=0){phone.ring=1.4;snd(1320,0.1,'square',0.035);setTimeout(()=>snd(1320,0.1,'square',0.035),170);}
+    if(phone.ring<=0){phone.ring=1.4;buzz([60,80,60]);snd(1320,0.1,'square',0.035);setTimeout(()=>snd(1320,0.1,'square',0.035),170);}
     if(hp('answer')&&P.state!=='grabbed')openDialog(CALL_LINES,true,()=>{phone.stage=2;banner('Meet Senior Ali at Soho Square',3);});
     else if(P.x>=GATE_X-14&&P.sayT<=0)say(P,'Better get that...');
   }
@@ -873,10 +930,10 @@ function drawHUD(c){
   if(state!=='casino'){c.fillStyle='#ff9e2c';c.fillRect(0,23,Math.round(W*clamp(P.x/CASINO_DOOR,0,1)),1);}
   else{txt(c,String(Math.max(0,Math.ceil(casinoT))),W/2,64,{font:FL,col:'#ffd23f',align:'center',outline:'#3a0a14'});}
   if(phone.stage===1&&state==='play'){
-    const tch=document.body.classList.contains('touch');
+    const tch=TOUCH;
     c.fillStyle='rgba(8,8,24,0.88)';c.fillRect(W/2-115,28,230,18);c.fillStyle='#4fe3ff';c.fillRect(W/2-115,45,230,1);
     const jig=Math.floor(T*16)%2?1:-1;c.fillStyle='#16161c';c.fillRect(W/2-106+jig,30,7,13);c.fillStyle='#4fe3ff';c.fillRect(W/2-105+jig,32,5,7);
-    txt(c,'Senior Ali calling. '+(tch?'Tap to answer':'Press C to answer'),W/2+6,37,{align:'center',col:'#ffd23f'});
+    txt(c,'Senior Ali calling. '+(tch?'Tap Answer':'Press C to answer'),W/2+6,37,{align:'center',col:'#ffd23f'});
   }
   if(bannerT>0){c.fillStyle='rgba(0,0,0,0.7)';c.fillRect(0,250,W,20);txt(c,bannerText,W/2,260,{font:FM,col:'#fff',align:'center'});}
   if(goT>0&&Math.floor(T*4)%2===0&&state==='play'){
@@ -915,7 +972,7 @@ function renderTitle(){
   txt(g,'Salmon Run',W/2,82,{font:FL,col:'#ff4fa3',align:'center',outline:'#2a0e20'});
   txt(g,'Hawksmoor to the casino. Dodge the touts.',W/2,104,{align:'center',col:'#e9e7f3',outline:'#090b24'});
   txt(g,'Hand out rosettes and napkins. Bank the Salmons.',W/2,116,{align:'center',col:'#e9e7f3',outline:'#090b24'});
-  if(Math.floor(T*2)%2===0)txt(g,'Press Enter or tap to start',W/2,142,{font:FM,col:'#ffd23f',align:'center',outline:'#000'});
+  if(Math.floor(T*2)%2===0)txt(g,TOUCH?'Tap to start':'Press Enter or tap to start',W/2,142,{font:FM,col:'#ffd23f',align:'center',outline:'#000'});
   if(best>0)txt(g,'Best night: £'+best,W/2,160,{align:'center',col:'#cfd7ff',outline:'#000'});
 }
 function renderSelect(){
@@ -932,7 +989,7 @@ function renderSelect(){
     txt(g,ch.tag[0],px+54,150,{align:'center',col:'#cfd7ff'});txt(g,ch.tag[1],px+54,160,{align:'center',col:'#cfd7ff'});
     stats.forEach(([l,f],k)=>{txt(g,l,px+8,178+k*14,{col:'#9a9cc0'});bar(g,px+8,184+k*14,92,4,f(ch),on?'#ff9e2c':'#6b6f9a','#0a0b20');});
   }
-  txt(g,'Left or right to choose. Enter or tap again to go.',W/2,254,{align:'center',col:'#e9e7f3'});
+  txt(g,TOUCH?'Tap a lad, then tap again to go.':'Left or right to choose. Enter or tap again to go.',W/2,254,{align:'center',col:'#e9e7f3'});
 }
 function renderOver(){
   drawSky(g,camX);drawSkyline(g,camX);g.fillStyle='rgba(8,8,24,0.7)';g.fillRect(0,0,W,H);
@@ -941,7 +998,7 @@ function renderOver(){
   txt(g,'You got '+Math.round(clamp(P.x/CASINO_DOOR,0,1)*100)+'% of the way to the casino.',W/2,120,{align:'center',col:'#cfd7ff'});
   txt(g,'The Salmons stay in the vault tonight.',W/2,136,{align:'center',col:'#cfd7ff'});
   txt(g,'Rosettes and napkins handed out: '+P.gifts,W/2,152,{align:'center',col:'#ff4fa3'});
-  if(endT>0.9&&Math.floor(T*2)%2===0)txt(g,'Press Enter or tap to go again',W/2,180,{font:FM,col:'#ffd23f',align:'center'});
+  if(endT>0.9&&Math.floor(T*2)%2===0)txt(g,TOUCH?'Tap to go again':'Press Enter or tap to go again',W/2,180,{font:FM,col:'#ffd23f',align:'center'});
 }
 function renderWin(){
   renderCasino();g.fillStyle='rgba(8,8,24,0.72)';g.fillRect(0,0,W,H);
@@ -951,7 +1008,7 @@ function renderWin(){
   txt(g,P.salmons+' Salmons banked: £'+(P.salmons*50),W/2,150,{font:FM,col:'#fff',align:'center'});
   txt(g,'Rosettes and napkins handed out: '+P.gifts+' of '+ladies.length,W/2,182,{align:'center',col:'#ff4fa3'});
   txt(g,newBest?'New best night!':'Best night: £'+best,W/2,168,{align:'center',col:newBest?'#ff4fa3':'#cfd7ff'});
-  if(endT>0.9&&Math.floor(T*2)%2===0)txt(g,'Press Enter or tap to go again',W/2,212,{font:FM,col:'#ffd23f',align:'center'});
+  if(endT>0.9&&Math.floor(T*2)%2===0)txt(g,TOUCH?'Tap to go again':'Press Enter or tap to go again',W/2,212,{font:FM,col:'#ffd23f',align:'center'});
 }
 function render(){
   g.setTransform(1,0,0,1,0,0);
@@ -969,7 +1026,7 @@ function render(){
   }else ctx.drawImage(buf,0,0);
   if(live)drawHUD(ctx);
   if(state==='dialog')drawDialog(ctx);
-  if(state==='paused'){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);txt(ctx,'Paused',W/2,H/2-8,{font:FL,col:'#fff',align:'center'});txt(ctx,'Press P or tap to carry on',W/2,H/2+16,{align:'center',col:'#cfd7ff'});}
+  if(state==='paused'){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);txt(ctx,'Paused',W/2,H/2-8,{font:FL,col:'#fff',align:'center'});txt(ctx,(TOUCH?'Tap to carry on':'Press P or tap to carry on'),W/2,H/2+16,{align:'center',col:'#cfd7ff'});}
 }
 
 /* ---------- loop ---------- */
@@ -977,7 +1034,7 @@ let last=performance.now(),acc=0;
 function frame(now){
   acc+=Math.min(0.1,(now-last)/1000);last=now;
   while(acc>=STEP){update(STEP);acc-=STEP;}
-  render();requestAnimationFrame(frame);
+  render();syncPad();requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 </script>
